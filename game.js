@@ -9,6 +9,7 @@ const ULTIMO_NIVEL = 10
 //esta clase Juego va a tener todas las funciones y la logica del juego
 class Juego{
     constructor(){
+        this.inicializar = this.inicializar.bind(this)
         this.inicializar()
         this.generarSecuencia()
         setTimeout(this.siguienteNivel,500)
@@ -17,8 +18,7 @@ class Juego{
     inicializar() {
         this.siguienteNivel = this.siguienteNivel.bind(this)//de esta el 'this' de la funcion siempre sera 'Juego', si no al usar la funcion con 'setTimeout' cambia el 'this' a 'Window' porque es un callback
         this.elegirColor = this.elegirColor.bind(this)//de esta forma siempre que llamemos a 'elegirColor' su 'this' hara referencia a 'Juego'
-        //btnEmpezar.style.display = 'none'
-        btnEmpezar.classList.add('hide')
+        this.toggleBtnEmpezar()
         this.nivel = 1
         //aca creamos un objeto colores que lleva 4 propiedades, en estas se guardan los botones.
         //JS va a guardar las constantes que ya declaramos en estas propiedades sin que lo
@@ -29,6 +29,11 @@ class Juego{
             naranja,
             verde 
         }
+    }
+
+    toggleBtnEmpezar(){
+        if(btnEmpezar.classList.contains('hide')) btnEmpezar.classList.remove('hide')
+        else btnEmpezar.classList.add('hide')   
     }
 
     generarSecuencia(){
@@ -106,20 +111,36 @@ class Juego{
         const nombreColor = e.target.dataset.color
         const numeroColor = this.transformarColorANumero(nombreColor)
         this.iluminarColor(nombreColor)
+        //si el color elegido es correcto
         if(numeroColor === this.secuencia[this.subnivel]){
            this.subnivel++
+           console.log("Ahora subnivel es: " + this.subnivel)
+           //Si se completa el nivel actual
            if(this.subnivel === this.nivel){
                this.nivel++
                this.eliminarEventosClick()
                if(this.nivel === (ULTIMO_NIVEL + 1)){
-                //GANA
-               } else{
-                setTimeout(this.siguienteNivel,1500)
+                this.ganar()
+               } else {
+                    setTimeout(this.siguienteNivel,1500)
                }
-           }
+            }
         } else{
-            // pierde
+            this.perder()
         }
+    }
+
+    ganar(){
+        swal('Ganaste','','success')//swal devuelve una promesa
+            .then(this.inicializar)
+    }
+
+    perder(){
+        swal('Perdiste','','error')
+            .then(() => {
+                this.eliminarEventosClick()
+                this.inicializar()
+            })
     }
 }
 
